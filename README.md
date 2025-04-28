@@ -1,2 +1,2 @@
-# IT-Security-Project---Audio-Steganography
+# IT-Security-Project-Audio-Steganography
 Concealing Images within Sound
