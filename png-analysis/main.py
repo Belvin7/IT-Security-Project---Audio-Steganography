@@ -77,19 +77,19 @@ def extract_png_metadata(png, filepath, data):
         "Magic bytes": magic,
         "Image width": png.ihdr.width,
         "Image height": png.ihdr.height,
-        "Megapixel": round((png.ihdr.width * png.ihdr.height) / 1_000_000, 4),
         "Bit depth": png.ihdr.bit_depth,
         "Color type": png.ihdr.color_type.name,
         "Compression method": png.ihdr.compression_method,
         "Filter method": png.ihdr.filter_method,
         "Interlace method": png.ihdr.interlace_method,
-        "File size": format_filesize(os.path.getsize(filepath)),
-        "SHA-256": hashlib.sha256(data).hexdigest(),
         "Chunks present": ", ".join(chunk.type for chunk in png.chunks),
         "Quantity per chunk": ", ".join(f"{k}: {v}" for k, v in chunk_counts.items()),
         "Text chunks": ", ".join(text_chunks),
-        "MIME" : "image/png" if magic == "89 50 4E 47 0D 0A 1A 0A" else "unknown",
+        "MIME": "image/png" if magic == "89 50 4E 47 0D 0A 1A 0A" else "unknown",
         "Significant bits (sBIT)": sbit if sbit else "",
+        "Megapixel": round((png.ihdr.width * png.ihdr.height) / 1_000_000, 4),
+        "File size": format_filesize(os.path.getsize(filepath)),
+        "SHA-256": hashlib.sha256(data).hexdigest(),
     }
 
     return metadata
