@@ -71,9 +71,10 @@ def extract_png_metadata(png, filepath, data):
 
     sbit = next((c.body.hex() for c in png.chunks if c.type == "sBIT"), None)
     text_chunks = extract_text_chunks(png)
+    magic = " ".join(f"{b:02X}" for b in png.magic)
 
     metadata = {
-        "Magic bytes": " ".join(f"{b:02X}" for b in png.magic),
+        "Magic bytes": magic,
         "Image width": png.ihdr.width,
         "Image height": png.ihdr.height,
         "Megapixel": round((png.ihdr.width * png.ihdr.height) / 1_000_000, 4),
@@ -87,6 +88,7 @@ def extract_png_metadata(png, filepath, data):
         "Chunks present": ", ".join(chunk.type for chunk in png.chunks),
         "Quantity per chunk": ", ".join(f"{k}: {v}" for k, v in chunk_counts.items()),
         "Text chunks": ", ".join(text_chunks),
+        "MIME" : "image/png" if magic == "89 50 4E 47 0D 0A 1A 0A" else "unknown",
         "Significant bits (sBIT)": sbit if sbit else "",
     }
 
