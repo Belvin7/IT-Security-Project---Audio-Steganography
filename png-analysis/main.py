@@ -1,24 +1,26 @@
 import argparse
-import os
-import sys
-import json
 import csv
+import glob
 import hashlib
-from io import BytesIO
+import http.server
+import json
+import os
+import socketserver
+import sys
 import threading
 import webbrowser
-import http.server
-import socketserver
+from io import BytesIO
 
 import cv2
 from kaitaistruct import KaitaiStream
+
 from png import Png
 
 
 ### ────────────────────── Argument Parsing ────────────────────── ###
 def parse_args():
     parser = argparse.ArgumentParser(description="Sherloq-compatible PNG forensic analyzer.")
-    parser.add_argument("files", nargs="+", help="Paths to one or more PNG files")
+    parser.add_argument("files", nargs="+", help="Paths to one or more PNG files (supports wildcards)")
 
     output_group = parser.add_mutually_exclusive_group()
     output_group.add_argument("--json", action="store_true", help="Output as JSON")
@@ -26,7 +28,12 @@ def parse_args():
     output_group.add_argument("--pretty", action="store_true", help="Pretty printed table view")
     output_group.add_argument("--serve", action="store_true", help="Serve HTML report via localhost (default)")
 
-    return parser.parse_args()
+    args = parser.parse_args()
+    expanded_files = []
+    for pattern in args.files:
+        expanded_files.extend(glob.glob(pattern))
+    args.files = expanded_files
+    return args
 
 
 ### ────────────────────── Core File Analyzer ────────────────────── ###
