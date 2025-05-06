@@ -9,6 +9,7 @@ import socketserver
 import sys
 import threading
 import webbrowser
+import zlib
 from io import BytesIO
 
 import cv2
@@ -69,6 +70,7 @@ def extract_png_metadata(png, filepath, data):
         chunk_counts[chunk.type] = chunk_counts.get(chunk.type, 0) + 1
 
     sbit = next((c.body.hex() for c in png.chunks if c.type == "sBIT"), None)
+    text_chunks = extract_text_chunks(png)
 
     metadata = {
         "Magic bytes": " ".join(f"{b:02X}" for b in png.magic),
@@ -84,9 +86,10 @@ def extract_png_metadata(png, filepath, data):
         "SHA-256": hashlib.sha256(data).hexdigest(),
         "Chunks present": ", ".join(chunk.type for chunk in png.chunks),
         "Quantity per chunk": ", ".join(f"{k}: {v}" for k, v in chunk_counts.items()),
-        "Significant bits (sBIT)": sbit if sbit else ""
+        "Text chunks": ", ".join(text_chunks),
+        "Significant bits (sBIT)": sbit if sbit else "",
     }
-    
+
     return metadata
 
 
@@ -112,6 +115,23 @@ def compute_image_hashes(filepath):
 
 def format_filesize(size_bytes):
     return f"{size_bytes} bytes ({round(size_bytes / 1024, 1)} KB)"
+
+
+def extract_text_chunks(png):
+    entries = []
+    for chunk in png.chunks:
+        try:
+            if chunk.type == "tEXt":
+                entries.append(f"{chunk.body.keyword}: {chunk.body.text}")
+            elif chunk.type == "zTXt":
+                text = zlib.decompress(chunk.body._raw_text_datastream).decode("utf-8", errors="replace")
+                entries.append(f"{chunk.body.keyword} (compressed): {text}")
+            elif chunk.type == "iTXt":
+                text = chunk.body.text
+                entries.append(f"{chunk.body.keyword} (i18n): {text}")
+        except Exception as e:
+            entries.append(f"[Error reading {chunk.type} chunk: {e}]")
+    return entries
 
 
 ### ────────────────────── Output Formatters ────────────────────── ###
