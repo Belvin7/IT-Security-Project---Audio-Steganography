@@ -84,11 +84,9 @@ def extract_png_metadata(png, filepath, data):
         "SHA-256": hashlib.sha256(data).hexdigest(),
         "Chunks present": ", ".join(chunk.type for chunk in png.chunks),
         "Quantity per chunk": ", ".join(f"{k}: {v}" for k, v in chunk_counts.items()),
+        "Significant bits (sBIT)": sbit if sbit else ""
     }
-
-    if sbit:
-        metadata["Significant bits (sBIT)"] = sbit
-
+    
     return metadata
 
 
