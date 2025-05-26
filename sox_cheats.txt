@@ -1,0 +1,21 @@
+Simple Spectrogram:
+sox t.mp3 -n spectrogram -o spectrum.png
+
+Flat factor:
+sox -n -p synth 10 square 1 norm -3 | sox - -n stats
+
+apply noise filter
+sox s1.mp3 noise.mp3 trim 0 0.900
+sox noise.mp3 -n noiseprof noise.prof
+sox s1.mp3 s1_clean.mp3 noisered noise.prof 0.21
+
+spectrogram-diff
+sox -m -v 1 s1.mp3 -v -1 s2.mp3 -n spectrogram -o sound-difference.png
+
+Sox-Stats
+sox input.wav -n stats
+
+
+Todo: https://gessel.blackrosetech.com/2024/02/07/audio-file-analysis-with-sox
+- Flat factor: sox -n -p synth 10 square 1 norm -3 | sox - -n stats ????
+- min/max-amplitude  and delta ????
