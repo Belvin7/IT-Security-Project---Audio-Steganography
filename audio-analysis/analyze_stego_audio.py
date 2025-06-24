@@ -6,12 +6,14 @@ import sys
 
 app = Flask(__name__)
 
+
 def sha256sum(filename):
     h = hashlib.sha256()
     with open(filename, 'rb') as f:
         for chunk in iter(lambda: f.read(8192), b''):
             h.update(chunk)
     return h.hexdigest()
+
 
 def recompress_audio(input_file, output_file, codec, bitrate="128k"):
     cmd = [
@@ -24,8 +26,10 @@ def recompress_audio(input_file, output_file, codec, bitrate="128k"):
     ]
     subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
+
 def file_size(path):
     return os.path.getsize(path)
+
 
 def analyze(stego_path, cover_path):
     size_cover = file_size(cover_path)
@@ -58,10 +62,10 @@ def analyze(stego_path, cover_path):
         os.remove(f)
 
     # Ratios & reductions
-    ratio_cover_opus = size_cover_opus / ((size_cover + size_cover_opus) / 2) if (size_cover + size_cover_opus) else 0
-    ratio_cover_lame = size_cover_lame / ((size_cover + size_cover_lame) / 2) if (size_cover + size_cover_lame) else 0
-    ratio_stego_opus = size_stego_opus / (size_stego + size_stego_opus) if (size_stego + size_stego_opus) else 0
-    ratio_stego_lame = size_stego_lame / (size_stego + size_stego_lame) if (size_stego + size_stego_lame) else 0
+    ratio_cover_opus = size_cover / ((size_cover + size_cover_opus) / 2) if (size_cover + size_cover_opus) else 0
+    ratio_cover_lame = size_cover / ((size_cover + size_cover_lame) / 2) if (size_cover + size_cover_lame) else 0
+    ratio_stego_opus = size_stego / ((size_stego + size_stego_opus) / 2) if (size_stego + size_stego_opus) else 0
+    ratio_stego_lame = size_stego / ((size_stego + size_stego_lame) / 2) if (size_stego + size_stego_lame) else 0
 
     reduction_lame = (size_stego - size_stego_lame) / size_stego if size_stego else 0
     reduction_opus = (size_stego - size_stego_opus) / size_stego if size_stego else 0
@@ -84,6 +88,7 @@ def analyze(stego_path, cover_path):
         "Durchschnittsreduktion for LAME": f"{reduction_lame:.2%}",
         "Durchschnittsreduktion for Opus": f"{reduction_opus:.2%}",
     }
+
 
 @app.route("/")
 def show_table():
@@ -139,6 +144,7 @@ def show_table():
     </html>
     """
     return render_template_string(html_template, rows=rows, headers=headers, cover_file=os.path.basename(cover_path))
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
